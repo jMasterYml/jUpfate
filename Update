@@ -1,0 +1,61 @@
+on join:
+	if {money.%player%} is not set:
+		set {money.%player%} to 0
+		stop
+
+command /banco [<text>] [<player>] [<number>]:
+	trigger:
+		if arg 1 is not set:
+			if player has permission "jstore.banco":
+		if arg 1 is set:
+			if arg 1 is not "saldo" or "atm" or "admin" or "add" or "adicionar":
+				make player execute command "banco saldo"
+			if arg 1 is "saldo":
+				send "&eSaldo: &a%{money.%player%}%"
+			if arg 1 is "atm":
+				open chest with 4 rows named "&8ATM" to player
+				format slot 12 of player with paper named "&eSaldo" with lore "&7Seu saldo é de &e%{money.%player%}%" to be unstealable
+			if arg 1 is "add" or "adicionar":
+				if arg 2 is set:
+					if arg 2 is online:
+						if arg 3 is number:
+							add arg 3 to {money.%arg 2%}
+							send "&aVocê adicionou %arg 3% para o %arg 2%"
+							stop
+						else:
+							send "&cVocê precisa digitar um numero."
+					else:
+						send "&cO jogador precisa estar online."
+				else:
+					send "&c* Utilize /banco add [jogador] [quantidade]"
+			if arg 1 is "admin":
+				send ""
+				send "&eAjuda Admin 1/1"
+				send ""
+				send "&3/banco add [jogador] [quantidade]"
+
+
+function banco_notifyUpdate(p: player, name: text, perm: text, id: text, v: text, cmd: text):
+	text from "https://api.spigotmc.org/legacy/update.php?resource=%{_id}%" is not "%{_v}%":
+		{_p} has permission "%{_perm}%.update" or "%{_perm}%.*":
+			send "%nl%&3 [%{_name}%] &7There is a new skript update, click <tooltip:&bClick here to update.><command:/%{_cmd}%>&a&lHERE<reset> &7to update.%nl% " to {_p}
+function banco_update(p: player, var: text, name: text):
+	send {_var} to {_p}
+	{_var} == "true":
+		set action bar of {_p} to "&aConectando com o site..."
+		wait 2 second
+		set {_percent1} to 90
+		loop 90 times:
+			add 1 to {_percent2}
+			set {_percent} to {_percent2}/{_percent1}*100
+			set action bar of {_p} to "&aBaixando arquivo... &8(%{_percent}%%%)"
+			wait a tick
+		set {_sk} to {_name}
+		delete file "plugins/Skript/scripts/%{_sk}%.sk"
+		download file from "https://raw.githubusercontent.com/KickHolse/%{_sk}%/master/update" to file "plugins/Skript/scripts/%{_sk}%.sk"
+		reload script "%{_sk}%"
+		set action bar of {_p} to "&aAtualização instalada com sucesso!"
+	else:
+		send "&cO skript se encontra em sua ultima versão." to {_p}
+on join:
+	banco_notifyUpdate(player, "banco", "banco", "76731", "1.0", "banco atualizar")
